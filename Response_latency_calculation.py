@@ -1,11 +1,6 @@
-"""
-Script for judge response
+## Script for judge response
 ## Takahiro Kamijo
-## 2024.03.05
-
-"""
-
-
+## 2024.05.03
 
 import pandas as pd
 import os
@@ -18,8 +13,8 @@ os.chdir("./response_results")
 
 
 def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
-    xlist = xcoor['blob_coord_x']
-    ylist = ycoor['blob_coord_y']
+    xlist = xcoor['Center_X']
+    ylist = ycoor['Center_Y']
     xnum = xcoor.shape[0]
     xcomean = []
     ycomean = []
@@ -31,77 +26,62 @@ def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
         ycomean.append(ymean)
 
     xconum = len(xcomean)//4
-    speed = []
-    for i in range(0, xconum - 1):  ##1秒間隔でspeedを出す 1~119
-        xdiff = xcomean[4*(i + 1)] - xcomean[4*i]
-        ydiff = ycomean[4*(i + 1)] - ycomean[4*i]
-        speed.append(np.sqrt(xdiff ** 2 + ydiff ** 2))
+    dist = []
 
+    for i in range(0, xconum-1):  ##最初の位置からどれだけ動いたかを計算
+        xdiff = xcomean[4*(i + 1)] - xcomean[0]
+        ydiff = ycomean[4*(i + 1)] - ycomean[0]
+        dist.append(np.sqrt(xdiff ** 2 + ydiff ** 2))
+    print(len(dist))
+    length = len(dist)
 
-    time = list(np.arange(1, len(speed) + 1, 1))  ##timeは1秒から始まる(最初のスピードの値が0.5-1.5秒のスピードだから )
+    before = max(dist[0:120])
+    after = max(dist[120:length])
+    print(before)
+    print(after)
+    time = list(np.arange(1, len(dist) + 1, 1))  ##timeは1秒から始まる(最初のスピードの値が0.5-1.5秒のスピードだから )
     df_speed = pd.DataFrame({'time': time,
-                             'speed_mean': speed})
+                             'distance': dist})
 
 
-    speed_before_stimulus = np.mean(speed[54:59])  ##55~59秒のspeedの平均
-    print(speed_before_stimulus)
-    end = len(speed)
-    speed_after_stimulus = speed[59:end]  ##60~119のspeed
-    print(len(speed))
 
-    ##判定
-
-    a = 0
-    response_delay = -4
+    #120 sの時点の位置から体の半分以上離れたら反応したとみなす
+    delay = 0
     response = False
-    for i in range(0, end-59):
-        if speed_after_stimulus[i] > speed_before_stimulus:
-            a += 1
+
+    for i in range(120, length):
+        if dist[i]<12:
+            delay += 1
         else:
-            a = 0
-        response_delay = response_delay + 1
-
-        if a == 4:        ##最初にspeedが刺激前の最大値を超えてから4秒経過したらresponseとする
-
             response = True
             break
 
-    if response:
-        df_speed["response_delay"] = response_delay
+    if before<12:
+        if response:
+            df_speed["response_delay"] = delay
+        else:
+            df_speed["response_delay"] = 120
     else:
-        if end == 118: ##刺激開始から60秒以内に反応がなければ 59s
-            df_speed["response_delay"] = 59
-        else:    ##覚醒したという判定にならないまま画面から出たらNot applicable
-            df_speed["response_delay"] = "Not applicable"
+        df_speed["response_delay"] = "Not applicable"
+
 
     df_speed.to_csv('./response.csv')
 
-    ########################################################################################
     ###speedをプロット
     fig = plt.figure()
-    ax = fig.add_subplot(2, 1, 1)
-    ti = time
-    ax.plot(ti, speed)
-    baseline = [speed_before_stimulus] * len(time)
-    ax.plot(ti, baseline)
-    ax.axvspan(response_delay + 60, response_delay + 63, color="coral")
-
     ###xをプロット
-    axx = fig.add_subplot(223)
+    axx = fig.add_subplot(211)
     tix = np.arange(0.5, len(xcomean) * 0.25 + 0.5, 0.25)
     axx.plot(tix, xcomean)
-    axx.axvspan(response_delay + 60, response_delay + 63, color="coral")
-    axx.axvspan(60, 60, color="green")
+    axx.axvspan(120, 120, color="green")
 
     ###yをプロット
-    axy = fig.add_subplot(224)
+    axy = fig.add_subplot(212)
     tiy = np.arange(0.5, len(xcomean) * 0.25 + 0.5, 0.25)
     axy.plot(tiy, ycomean)
-    axy.axvspan(response_delay + 60, response_delay + 63, color="coral")
-    axy.axvspan(60, 60, color="green")
+    axy.axvspan(120, 120, color="green")
 
     plt.savefig("./result.png")
-    plt.show()
 
 
 #################################################################################################
