@@ -25,23 +25,33 @@ def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
         xcomean.append(xmean)
         ycomean.append(ymean)
 
-    xconum = len(xcomean)//4
-    dist = []
+    length = len(xcomean)
+    dist_before = [] #0~120 sの距離を格納
+    dist_after = [] #120~240 sの距離を格納
 
-    for i in range(0, xconum-1):  ##最初の位置からどれだけ動いたかを計算
-        xdiff = xcomean[4*(i + 1)] - xcomean[0]
-        ydiff = ycomean[4*(i + 1)] - ycomean[0]
-        dist.append(np.sqrt(xdiff ** 2 + ydiff ** 2))
-    print(len(dist))
-    length = len(dist)
+    for i in range(0, 478):  ##最初の位置からどれだけ動いたかを計算
+        xdiff = xcomean[i] - xcomean[0]
+        ydiff = ycomean[i] - ycomean[0]
+        dist_before.append(np.sqrt(xdiff ** 2 + ydiff ** 2))
 
-    before = max(dist[0:120])
-    after = max(dist[120:length])
+    for i in range(478, length):  ##最初の位置からどれだけ動いたかを計算
+        xdiff = xcomean[i] - xcomean[478]
+        ydiff = ycomean[i] - ycomean[478]
+        dist_after.append(np.sqrt(xdiff ** 2 + ydiff ** 2))
+
+
+    print(len(dist_after))
+    print(len(dist_before))
+    length_after= len(dist_after)
+
+    before = max(dist_before[:])
+    after = max(dist_after[:])
     print(before)
     print(after)
-    time = list(np.arange(1, len(dist) + 1, 1))  ##timeは1秒から始まる(最初のスピードの値が0.5-1.5秒のスピードだから )
+    time = list(np.arange(0.5, len(xcomean)*0.25 + 0.5, 0.25))  ##timeは1秒から始まる(最初のスピードの値が0.5-1.5秒のスピードだから )
     df_speed = pd.DataFrame({'time': time,
-                             'distance': dist})
+                             'x': xcomean,
+                             'y': ycomean })
 
 
 
@@ -49,14 +59,14 @@ def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
     delay = 0
     response = False
 
-    for i in range(120, length):
-        if dist[i]<12:
-            delay += 1
+    for i in range(0, length_after):
+        if dist_after[i]<17:
+            delay += 0.25
         else:
             response = True
             break
 
-    if before<12:
+    if before<17:
         if response:
             df_speed["response_delay"] = delay
         else:
