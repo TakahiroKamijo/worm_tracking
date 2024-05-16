@@ -1,9 +1,8 @@
-""
+"""
 Script for judge response
 ## Takahiro Kamijo
 ## 2024.03.05
 
-Change the interval from 0.25 s to 1 s
 """
 
 
