@@ -55,18 +55,20 @@ def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
 
 
 
-    #120 sの時点の位置から体の半分以上離れたら反応したとみなす
+    #120 sの時点の位置から体の1/4以上離れたら反応したとみなす
     delay = 0
     response = False
+    bodysize = 40
+    threshold = bodysize/4
 
     for i in range(0, length_after):
-        if dist_after[i]<17:
+        if dist_after[i]<threshold:
             delay += 0.25
         else:
             response = True
             break
 
-    if before<17:
+    if before<threshold:
         if response:
             df_speed["response_delay"] = delay
         else:
@@ -77,21 +79,38 @@ def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
 
     df_speed.to_csv('./response.csv')
 
-    ###speedをプロット
+    ###座標をプロット
     fig = plt.figure()
     ###xをプロット
-    axx = fig.add_subplot(211)
+    axx = fig.add_subplot(221)
     tix = np.arange(0.5, len(xcomean) * 0.25 + 0.5, 0.25)
-    axx.plot(tix, xcomean)
-    axx.axvspan(120, 120, color="green")
+    axx.plot(tix, xcomean, color="black")
+    axx.axvspan(120, 240, color="cornflowerblue")
 
     ###yをプロット
-    axy = fig.add_subplot(212)
+    axy = fig.add_subplot(222)
     tiy = np.arange(0.5, len(xcomean) * 0.25 + 0.5, 0.25)
-    axy.plot(tiy, ycomean)
-    axy.axvspan(120, 120, color="green")
+    axy.plot(tiy, ycomean, color="black")
+    axy.axvspan(120, 240, color="cornflowerblue")
 
-    plt.savefig("./result.png")
+    plt.savefig("./coordinates.png")
+
+#距離用のグラフを作成
+    plt.rcParams["font.size"] = 15
+    fig, axes = plt.subplots(1,2, sharey="all", tight_layout=True, figsize=(8.0,5.0))
+
+#before
+    tidb = np.arange(0, len(dist_before)*0.25, 0.25)
+    axes[0].plot(tidb, dist_before, color="black")
+    axes[0].set_xticks(np.arange(0,121,30))
+
+#after
+    tida = np.arange(120, 120+len(dist_after) * 0.25, 0.25)
+    axes[1].plot(tida, dist_after, color="blue")
+    axes[1].set_xticks(np.arange(120, 241, 30))
+
+
+    plt.savefig("./distance.png")
 
 
 #################################################################################################

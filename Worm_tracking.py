@@ -28,10 +28,18 @@ def track_and_save_worms_with_tracking(video_path,image_path):
     previous_labels = []  # 直前フレームの線虫のラベルを保存するリスト
 
     frame_number = 0
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = None
+
     while True:
         ret, frame = cap.read()
         if not ret:
             break
+
+        if out is None:
+            frame_height, frame_width = frame.shape[:2]
+            output_path = Path(video_path).with_name('labeled_output.avi')
+            out = cv2.VideoWriter(str(output_path), fourcc, 20.0, (frame_width, frame_height))
 
         # グレースケールに変換
         gray_frame = 255 - cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -55,7 +63,7 @@ def track_and_save_worms_with_tracking(video_path,image_path):
             # 輪郭の面積を計算
             area = cv2.contourArea(contour)
 
-            if 50 <= area <= 200:
+            if 30 <= area <= 200:
                 # 輪郭を囲む最小の矩形を取得
                 x, y, w, h = cv2.boundingRect(contour)
 
@@ -128,9 +136,16 @@ def track_and_save_worms_with_tracking(video_path,image_path):
         for (center_x, center_y), (w,h), label in zip(current_centers, current_box, current_labels):
             x = center_x - (w // 2)
             y = center_y - (h // 2)
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
+        # 描画する四角形の色を決定
+        rectangle_color = (128, 128, 128) if frame_number < 480 else (255, 0, 0)
+
+        # 右上に四角形を描画
+        cv2.rectangle(frame, (frame_width - 110, 10), (frame_width - 10, 110), rectangle_color, -1)
+
+        out.write(frame)
         cv2.imshow('Tracking', frame)
         if cv2.waitKey(30) & 0xFF == ord('q'):
             break
@@ -161,9 +176,10 @@ def track_and_save_worms_with_tracking(video_path,image_path):
 
     # 後処理
     cap.release()
+    out.release()
     cv2.destroyAllWindows()
 
-image_path = "C:\\Users\\yhlab\\Documents\\wormtrack\\background\\background.jpg"
+image_path = ".\\background.jpg"
 
 def main():
     # select file
