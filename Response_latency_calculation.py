@@ -12,29 +12,29 @@ os.makedirs("./response_results", exist_ok=True)
 os.chdir("./response_results")
 
 
-def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
+def speed_calculation(xcoor, ycoor):  #
     xlist = xcoor['Center_X']
     ylist = ycoor['Center_Y']
     xnum = xcoor.shape[0]
     xcomean = []
     ycomean = []
 
-    for i in range(0, xnum - 4):  # 一秒間の平均位置を出すことでスムージング 0.5~119.5 s
+    for i in range(0, xnum - 4):
         xmean = (xlist[i + 4] + xlist[i + 3] + xlist[i + 2] + xlist[i + 1] + xlist[i]) / 5
         ymean = (ylist[i + 4] + ylist[i + 3] + ylist[i + 2] + ylist[i + 1] + ylist[i]) / 5
         xcomean.append(xmean)
         ycomean.append(ymean)
 
     length = len(xcomean)
-    dist_before = [] #0~120 sの距離を格納
-    dist_after = [] #120~240 sの距離を格納
+    dist_before = []
+    dist_after = []
 
-    for i in range(0, 478):  ##最初の位置からどれだけ動いたかを計算
+    for i in range(0, 478):
         xdiff = xcomean[i] - xcomean[0]
         ydiff = ycomean[i] - ycomean[0]
         dist_before.append(np.sqrt(xdiff ** 2 + ydiff ** 2))
 
-    for i in range(478, length):  ##最初の位置からどれだけ動いたかを計算
+    for i in range(478, length):
         xdiff = xcomean[i] - xcomean[478]
         ydiff = ycomean[i] - ycomean[478]
         dist_after.append(np.sqrt(xdiff ** 2 + ydiff ** 2))
@@ -48,14 +48,14 @@ def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
     after = max(dist_after[:])
     print(before)
     print(after)
-    time = list(np.arange(0.5, len(xcomean)*0.25 + 0.5, 0.25))  ##timeは1秒から始まる(最初のスピードの値が0.5-1.5秒のスピードだから )
+    time = list(np.arange(0.5, len(xcomean)*0.25 + 0.5, 0.25))
     df_speed = pd.DataFrame({'time': time,
                              'x': xcomean,
                              'y': ycomean })
 
 
 
-    #120 sの時点の位置から体の1/4以上離れたら反応したとみなす
+
     delay = 0
     response = False
     bodysize = 40
@@ -79,15 +79,15 @@ def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
 
     df_speed.to_csv('./response.csv')
 
-    ###座標をプロット
+
     fig = plt.figure()
-    ###xをプロット
+
     axx = fig.add_subplot(221)
     tix = np.arange(0.5, len(xcomean) * 0.25 + 0.5, 0.25)
     axx.plot(tix, xcomean, color="black")
     axx.axvspan(120, 240, color="cornflowerblue")
 
-    ###yをプロット
+
     axy = fig.add_subplot(222)
     tiy = np.arange(0.5, len(xcomean) * 0.25 + 0.5, 0.25)
     axy.plot(tiy, ycomean, color="black")
@@ -95,7 +95,7 @@ def speed_calculation(xcoor, ycoor):  ##xcoor, ycoorは座標データのパス
 
     plt.savefig("./coordinates.png")
 
-#距離用のグラフを作成
+
     plt.rcParams["font.size"] = 15
     fig, axes = plt.subplots(1,2, sharey="all", tight_layout=True, figsize=(8.0,5.0))
 
@@ -130,7 +130,7 @@ def main():
     xcoor = pd.read_csv(filepath_x)
     ycoor = pd.read_csv(filepath_y)
 
-    # Lethargus analysis
+
     speed_calculation(xcoor, ycoor)
 
 
