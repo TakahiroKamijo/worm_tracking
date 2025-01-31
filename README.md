@@ -1,10 +1,10 @@
 # Worm tracking
 ## Worm_tracking
-画面内の複数の線虫をbounding boxで囲み、中心の座標を出します。  
-実行して動画ファイルを選択してください。
+Surround multiple worms in the screen with a bounding box to get the coordinates of the center.  
+Run and select a video file.
 
 ## Response_latency_calculation
-**4fpsで240秒間動画を取り、撮影開始120秒後に刺激を与えていることを前提としています。**  
-刺激を与えてから線虫が反応するまでの時間を計算します。線虫の位置の座標グラフを出力します。  
-体のサイズの**1/4**以上動いたら反応したとみなしています。倍率によってbody sizeは変更してください。
+** This scripts assumes that the video is taken for 240 seconds at 4 fps and the stimulus is applied 120 seconds after the start of imaging. **
+Calculates the time it takes for the worm to respond to the stimulus. Outputs a graph of the coordinates of the nematode's position.  
+If it moves more than **1/4** of its body size, it is considered to have reacted. Please change the body size according to the magnification.
 
