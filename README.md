@@ -1,4 +1,10 @@
 # Worm tracking
+
+
+
+![Demo](https://github.com/user-attachments/assets/80362cf3-11f2-4ad1-96b0-a72bb7c77cc2)
+
+
 ## Worm_tracking
 This script detect multiple worms on the screen and surrounds them with a bounding box to get the coordinates of the center.\
 Run and select a video file.\
